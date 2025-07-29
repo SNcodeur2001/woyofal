@@ -14,27 +14,60 @@ class Router
     }
     
     public static function resolve(): void
-    {
-        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $method = $_SERVER['REQUEST_METHOD'];
-        
-        // Chercher une route exacte
-        if (isset(self::$routes[$uri])) {
-            self::executeRoute(self::$routes[$uri]);
+{
+    error_log("🚀 Router::resolve() - DÉBUT");
+    
+    $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $method = $_SERVER['REQUEST_METHOD'];
+    
+    // ⭐ Nettoyer et normaliser l'URI
+    $uri = '/' . trim($uri, '/');
+    if ($uri === '/') $uri = '/';
+    
+    error_log("📍 URI originale: " . ($_SERVER['REQUEST_URI'] ?? 'non définie'));
+    error_log("📍 URI nettoyée: '{$uri}'");
+    error_log("📍 Méthode HTTP: '{$method}'");
+    error_log("📍 Routes disponibles: " . json_encode(array_keys(self::$routes)));
+    
+    // ⭐ 1. Chercher une route exacte
+    if (isset(self::$routes[$uri])) {
+        error_log("✅ Route exacte trouvée: {$uri}");
+        self::executeRoute(self::$routes[$uri]);
+        return;
+    }
+    
+    // ⭐ 2. Chercher une route avec paramètres
+    foreach (self::$routes as $route => $config) {
+        if (self::matchRoute($route, $uri)) {
+            error_log("✅ Route avec paramètres trouvée: {$route} match {$uri}");
+            self::executeRoute($config, self::extractParams($route, $uri));
             return;
         }
-        
-        // Chercher une route avec paramètres
-        foreach (self::$routes as $route => $config) {
-            if (self::matchRoute($route, $uri)) {
-                self::executeRoute($config, self::extractParams($route, $uri));
-                return;
-            }
-        }
-        
-        // Route 404
-        self::executeRoute(self::$routes['/404'] ?? self::$routes['/']);
     }
+    
+    // ⭐ 3. Route 404
+    error_log("❌ Aucune route trouvée pour: {$uri}");
+    
+    if (isset(self::$routes['/404'])) {
+        error_log("🔄 Redirection vers route 404");
+        self::executeRoute(self::$routes['/404']);
+    } elseif (isset(self::$routes['/'])) {
+        error_log("🔄 Redirection vers route par défaut");
+        self::executeRoute(self::$routes['/']);
+    } else {
+        error_log("💥 Aucune route de fallback!");
+        http_response_code(404);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'error' => 'Route non trouvée',
+            'uri' => $uri,
+            'method' => $method,
+            'available_routes' => array_keys(self::$routes)
+        ]);
+    }
+    
+    error_log("🏁 Router::resolve() - FIN");
+}
     
     private static function matchRoute(string $route, string $uri): bool
     {
