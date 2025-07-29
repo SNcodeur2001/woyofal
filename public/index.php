@@ -3,11 +3,11 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-require_once '../app/config/bootstrap.php';
+// ✅ CORRECTION: Utiliser __DIR__ au lieu de chemin relatif
+require_once __DIR__ . '/../app/config/bootstrap.php';
 
 use Mapathe\Router;
 
 Router::setRoute($routes);
 
 Router::resolve();
-

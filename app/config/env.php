@@ -1,7 +1,8 @@
 <?php
 use Dotenv\Dotenv;
 
-$dotenv = Dotenv::createImmutable('../');
+// Pointer vers la racine du projet de façon absolue
+$dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
 $dotenv->load();
 
 define('DB_HOST', $_ENV['DB_HOST'] ?? 'localhost');
@@ -11,4 +12,5 @@ define('DB_USER', $_ENV['DB_USER'] ?? 'user');
 define('DB_PASSWORD', $_ENV['DB_PASSWORD'] ?? 'postgrespsw');
 define('DB_NAME', $_ENV['DB_NAME'] ?? $_ENV['DB_DATABASE'] ?? 'dbname');
 define('METHODE_INSTANCE_NAME', $_ENV['METHODE_INSTANCE_NAME'] ?? 'getInstance');
-define('SERVICES_PATH', $_ENV['SERVICES_PATH'] ?? '../app/config/services.yml');
+// Chemin absolu vers services.yml
+define('SERVICES_PATH', $_ENV['SERVICES_PATH'] ?? __DIR__ . '/services.yml');
