@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: appwoyofal
+    runtime: docker
+    plan: free
+
+    # Image Docker depuis Docker Hub
+    image:
+      url: docker.io/sncodeur2001/appwoyofal:latest
+
+    # Port d'écoute
+    port: 80
+
+    # Variables d'environnement
+    envVars:
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        value: aws-0-eu-west-3.pooler.supabase.com    # Host de Supabase
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_USER
+        value: postgres.bggsopbguyuuljjuqzsd          # Utilisateur Supabase
+      - key: DB_PASSWORD
+        value: passer123                             # Mot de passe Supabase
+      - key: DB_NAME
+        value: postgres                              # Base par défaut sur Supabase
+      - key: METHODE_INSTANCE_NAME
+        value: "getInstance"
+      - key: SERVICES_PATH
+        value: "/var/www/html/app/config/services.yml"
+      - key: APP_ENV
+        value: "production"
+
+    # Health check
+    healthCheckPath: "/"
+
+    # Déploiement automatique
+    autoDeploy: true
+
+    scaling:
+      minInstances: 1
+      maxInstances: 1
